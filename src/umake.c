@@ -1,6 +1,6 @@
 /* CSCI 347 micro-make
- * 
- * 09 AUG 2017, Aran Clauson
+ *
+ * 05 Oct 2018, Martin Smith
  */
 
 
@@ -10,19 +10,26 @@
 #include <sys/wait.h>
 
 /* CONSTANTS */
-
+unsigned int argCount(char* line);
 
 /* PROTOTYPES */
 
 /* Process Line
  * line   The command line to execute.
  * This function interprets line as a command line.  It creates a new child
- * process to execute the line and waits for that process to complete. 
+ * process to execute the line and waits for that process to complete.
  */
 void processline(char* line);
 
+/* Arg Parse
+*  line
+*
+*
+*/
+char** arg_parse(char*line);
+
 /* Main entry point.
- * argc    A count of command-line arguments 
+ * argc    A count of command-line arguments
  * argv    The command-line argument valus
  *
  * Micro-make (umake) reads from the uMakefile in the current working
@@ -37,7 +44,7 @@ int main(int argc, const char* argv[]) {
   size_t  bufsize = 0;
   char*   line    = NULL;
   ssize_t linelen = getline(&line, &bufsize, makefile);
-  
+
   while(-1 != linelen) {
 
     if(line[linelen-1]=='\n') {
@@ -45,7 +52,7 @@ int main(int argc, const char* argv[]) {
       line[linelen] = '\0';
     }
 
-    if(line[0] == '\t') 
+    if(line[0] == '\t')
       processline(&line[1]);
 
 
@@ -58,10 +65,10 @@ int main(int argc, const char* argv[]) {
 
 
 /* Process Line
- * 
+ *
  */
 void processline (char* line) {
-  
+  char** unkownVar = arg_parse(line);
   const pid_t cpid = fork();
   switch(cpid) {
 
@@ -90,4 +97,50 @@ void processline (char* line) {
     break;
   }
   }
+}
+/*  argCount
+*
+*
+*/
+
+unsigned int argCount(char* line){
+    unsigned int count = 0;
+
+    while (*line != '\0'){
+        if(*line != ' '){
+            count++;
+            while (*line != '\0' || *line != ' '){
+              line++;
+            }
+        }
+        if(*line != '\0'){
+            line++;
+        }
+    }
+    return count;
+}
+/* Arg Parse
+*
+*/
+char** arg_parse(char* line){
+    char** args = malloc ((argCount(line) + 1) * sizeof(char*));
+
+    unsigned int argCurr = 0;
+    while(*line != '\0'){
+        while(*line == ' '){
+            line++;
+        }
+        *args[argCurr] = *line;
+        argCurr++;
+        while(*line != ' ' || *line != '\0'){
+            line++;
+        }
+        if(*line == ' '){
+            *line = '\0';
+            line++;
+        }
+    }
+    *args[argCurr] = *line;
+
+    return args;
 }
