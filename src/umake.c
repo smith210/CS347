@@ -65,10 +65,13 @@ int main(int argc, const char* argv[]) {
 
 
 /* Process Line
- *
+ * based on the arguements passed through, it reads and executes the process
+ * stated within uMakefile with execvp.
  */
 void processline (char* line) {
-  char** unkownVar = arg_parse(line);
+
+  char** lne = arg_parse(line);
+
   const pid_t cpid = fork();
   switch(cpid) {
 
@@ -78,8 +81,9 @@ void processline (char* line) {
   }
 
   case 0: {
-    execlp(line, line, (char*)(0));
-    perror("execlp");
+    execvp(lne[0], lne);
+
+    perror("execvp");
     exit(EXIT_FAILURE);
     break;
   }
@@ -99,48 +103,45 @@ void processline (char* line) {
   }
 }
 /*  argCount
-*
+*   counts number of arguements
 *
 */
 
 unsigned int argCount(char* line){
-    unsigned int count = 0;
-
-    while (*line != '\0'){
-        if(*line != ' '){
-            count++;
-            while (*line != '\0' || *line != ' '){
-              line++;
-            }
-        }
-        if(*line != '\0'){
-            line++;
-        }
+  unsigned int counter = 0;
+  while (*line != '\0'){
+    if(*line == ' ' || *line == '\t'){
+      line++;
+    }else{
+      counter++;
+      while(*line != ' ' && *line != '\0' && *line != '\t'){
+        line++;
+      }
     }
-    return count;
+  }
+  return counter;
 }
 /* Arg Parse
-*
+* returns a set of pointers that points at the beginning of each
+* arguement, setting the end of each arguement with a null space.
 */
 char** arg_parse(char* line){
-    char** args = malloc ((argCount(line) + 1) * sizeof(char*));
-
-    unsigned int argCurr = 0;
-    while(*line != '\0'){
-        while(*line == ' '){
-            line++;
-        }
-        *args[argCurr] = *line;
-        argCurr++;
-        while(*line != ' ' || *line != '\0'){
-            line++;
-        }
-        if(*line == ' '){
-            *line = '\0';
-            line++;
-        }
+  char** args = malloc ((argCount(line) + 1) * sizeof(char*));
+  unsigned int curr = 0;
+  while(*line != '\0' && argCount(line) > 0){
+    while(*line == ' '){
+      line++;
     }
-    *args[argCurr] = *line;
+    args[curr] = line;
+    curr++;
+    while(*line != ' ' && *line != '\0' && *line != '\t'){
+      line++;
+    }
+    if(*line == ' ' || *line == '\t'){
+      *line = '\0';
+      line++;
+    }
+  }
 
-    return args;
+  return args;
 }
