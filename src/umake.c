@@ -22,9 +22,9 @@ unsigned int argCount(char* line);
 void processline(char* line);
 
 /* Arg Parse
-*  line
-*
-*
+*  line   Interprets the command line by counting the number of arguements,
+*  and creating pointers and null spaces per each arguement if there are
+*  multiple. 
 */
 char** arg_parse(char*line);
 
@@ -65,8 +65,7 @@ int main(int argc, const char* argv[]) {
 
 
 /* Process Line
- * based on the arguements passed through, it reads and executes the process
- * stated within uMakefile with execvp.
+ *
  */
 void processline (char* line) {
 
