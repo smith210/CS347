@@ -8,9 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
-/* CONSTANTS */
-unsigned int argCount(char* line);
+#include "arg_parse.h"
 
 /* PROTOTYPES */
 
@@ -24,9 +22,8 @@ void processline(char* line);
 /* Arg Parse
 *  line   Interprets the command line by counting the number of arguements,
 *  and creating pointers and null spaces per each arguement if there are
-*  multiple. 
+*  multiple.
 */
-char** arg_parse(char*line);
 
 /* Main entry point.
  * argc    A count of command-line arguments
@@ -35,7 +32,7 @@ char** arg_parse(char*line);
  * Micro-make (umake) reads from the uMakefile in the current working
  * directory.  The file is read one line at a time.  Lines with a leading tab
  * character ('\t') are interpreted as a command and passed to processline minus
- * the leading tab.
+ * the leading tab.rg_
  */
 int main(int argc, const char* argv[]) {
 
@@ -68,8 +65,9 @@ int main(int argc, const char* argv[]) {
  *
  */
 void processline (char* line) {
-
-  char** lne = arg_parse(line);
+  int num_arg;
+  char** lne = arg_parse(line, &num_arg);
+  //printf("num_args: %d\n", num_arg);
 
   const pid_t cpid = fork();
   switch(cpid) {
@@ -80,10 +78,12 @@ void processline (char* line) {
   }
 
   case 0: {
+    if (num_arg > 0){
     execvp(lne[0], lne);
 
     perror("execvp");
     exit(EXIT_FAILURE);
+    }
     break;
   }
 
@@ -100,47 +100,4 @@ void processline (char* line) {
     break;
   }
   }
-}
-/*  argCount
-*   counts number of arguements
-*
-*/
-
-unsigned int argCount(char* line){
-  unsigned int counter = 0;
-  while (*line != '\0'){
-    if(*line == ' ' || *line == '\t'){
-      line++;
-    }else{
-      counter++;
-      while(*line != ' ' && *line != '\0' && *line != '\t'){
-        line++;
-      }
-    }
-  }
-  return counter;
-}
-/* Arg Parse
-* returns a set of pointers that points at the beginning of each
-* arguement, setting the end of each arguement with a null space.
-*/
-char** arg_parse(char* line){
-  char** args = malloc ((argCount(line) + 1) * sizeof(char*));
-  unsigned int curr = 0;
-  while(*line != '\0' && argCount(line) > 0){
-    while(*line == ' '){
-      line++;
-    }
-    args[curr] = line;
-    curr++;
-    while(*line != ' ' && *line != '\0' && *line != '\t'){
-      line++;
-    }
-    if(*line == ' ' || *line == '\t'){
-      *line = '\0';
-      line++;
-    }
-  }
-
-  return args;
 }
