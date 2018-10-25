@@ -13,6 +13,7 @@ target collect_tgts(){
   char*   line    = NULL;
   ssize_t linelen = getline(&line, &bufsize, makefile);
   target curr;
+  int curr_arg;
 
   while(-1 != linelen) {
 
@@ -21,8 +22,14 @@ target collect_tgts(){
       line[linelen] = '\0';
     }
 
-    if(line[0] == '\t')
-      processline(&line[1]);
+    if(is_colon(&line) == 0){
+      curr->one_target = line;
+      int col_place = find_colon(line);
+      curr->two_dependent = arg_parse(line[col_place], &curr_arg);
+    }else{
+//      curr->three_rule = ;
+printf("DERP");
+    }
 
 
     linelen = getline(&line, &bufsize, makefile);
@@ -38,6 +45,18 @@ int target_search(target* t, char* name){
   return strcmp(t->one_target, name);
 }
 
+static unsigned int find_colon(char* line){
+  unsigned int exist_colon = 0;
+  while (*line != '\0'){
+    if(*line == ':'){
+      break;
+    }
+    exist_colon++;
+    line++;
+  }
+  return exist_colon;
+}
+
 static unsigned int is_colon(char* line){
   unsigned int exist_colon = 1; //1 = false, 0 = true;
   while (*line != '\0'){
@@ -49,14 +68,7 @@ static unsigned int is_colon(char* line){
   return exist_colon;
 }
 
-char* add_target(char* name){
-  return name;
-}
-char** add_dependents(char* new_dependent, char** dependent_list, int num_arg){
-  dependent_list[num_arg] = new_dependent;
-  return dependent_list;
-}
-char*** add_rules(char*** rule_list, char** new_rule, int num_arg){
-  rule_list[num_arg] = new_rule;
-  return rule_list;
+char*** add_rules(char** new_rule, char*** guideline, int num_arg){
+  guideline[num_arg] = new_rule;
+  return guideline;
 }
