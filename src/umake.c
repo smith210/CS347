@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "arg_parse.h"
+#include <ctype.h>
 
 /* PROTOTYPES */
 
