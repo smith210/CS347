@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "arg_parse.h"
+#include <ctype.h>
 /*  argCount
 *   counts number of arguements
 *
@@ -27,22 +28,27 @@ static unsigned int argCount(char* line){
 * arguement, setting the end of each arguement with a null space.
 */
 char** arg_parse(char* line, int* argcp){
-  *argcp = argCount(line);
-  char** args = malloc ((argCount(line) + 1) * sizeof(char*));
+  unsigned int num_args = argCount(line);
+  *argcp = num_args;
+
+  char** args = malloc ((num_args + 1) * sizeof(char*));
   unsigned int curr = 0;
-  while(*line != '\0' && argCount(line) > 0){
-    while(*line == ' '){
-      line++;
+  int begin_arg = 1;//1 = false, 0 = true
+
+  while(*line != '\0' && num_args > 0){
+    if (isspace((int)(*line))){
+      if (begin_arg == 0){
+        begin_arg = 1;
+        *line = '\0';
+      }
+    }else{
+      if (begin_arg == 1){
+        begin_arg = 0;
+        args[curr] = line;
+        curr++;
+      }
     }
-    args[curr] = line;
-    curr++;
-    while(*line != ' ' && *line != '\0' && *line != '\t'){
       line++;
-    }
-    if(*line == ' ' || *line == '\t'){
-      *line = '\0';
-      line++;
-    }
   }
 
   return args;
