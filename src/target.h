@@ -7,13 +7,14 @@ int state_one(char* line);
 char** add_tgt(char* new_rule, char** guideline, int num_arg);
 char*** add_rules(char** new_rule, char*** guideline, int num_arg);
 int is_tgt_alphabet(char* line);
-char** target_parse(char* line);
+char*** target_parse(char* line, int* argcp, int* argtp, int* argdp);
 int is_tgt_q0(char* line);
 int is_tgt_q1(char* line);
 int is_tgt_q2(char* line);
 
 typedef struct target_st{
     char** one_tgt;
+    //char** multi_tgt;
     char** two_dpndt;
     char*** three_rule;
     struct target_st* next;

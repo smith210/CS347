@@ -75,10 +75,10 @@ unsigned int find_colon(char** line){
 *add_rules - appends rules to pre-existing rules
 */
 
-char** target_parse(char* line){
+char*** target_parse(char* line, int* argcp, int* argtp, int* argdp){
   unsigned int num_args = count(line);
 
-
+  char*** all_args = malloc(2*sizeof(char**));
   char** args = malloc ((num_args + 1) * sizeof(char*));
   unsigned int curr = 0;
   int begin_arg = 1;//1 = false, 0 = true
@@ -91,8 +91,9 @@ char** target_parse(char* line){
         *line = '\0';
       }
     }else{
-      printf("%c\n", *line);
+
       if (begin_arg == 1){
+        //printf("%s\n", line);
         begin_arg = 0;
         args[curr] = line;
         curr++;
@@ -101,8 +102,25 @@ char** target_parse(char* line){
       line++;
   }
   *line = '\0';
-
-  return args;
+  line++;
+  while(isspace((int) *line)){
+    line++;
+  }
+  //printf("%s\n", line);
+  //*line = '\0';
+  all_args[0] = args;
+  //printf("arg0\n");
+  int dep_num;
+  all_args[1] = arg_parse(line, &dep_num);
+  //printf("arg1\n");
+  if(num_args - curr - dep_num != 0){
+    num_args--;
+  }
+  *argcp = num_args;
+  *argtp = dep_num;
+  *argdp = curr;
+  //printf("%d\n", *argcp);
+  return all_args;
 }
 
 
