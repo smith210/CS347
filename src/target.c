@@ -6,11 +6,21 @@
 #include <string.h>
 #include "arg_parse.h"
 #include "target.h"
+/*
+*Note: I tried parsing using a state machine but I didn't really understand how
+* to implement it, and thus therefore I couldn't get it working with my
+* original code, so I left it out and stayed with my original code.
+*Also I have several misunderstandings about linked lists that I didn't
+*realize I had (especially when it came to pointers and setting them up) until
+*too late, so the code will not exactly work up to par (for now).
+*
+*/
+
+
 
 /*
-*is_colon
-* 1 = colon in line
-* 0 = no colon in line
+*count
+* needed it in target since the function in arg_parse was static.
 */
 static unsigned int count(char* line){
   unsigned int counter = 0;
@@ -30,7 +40,11 @@ static unsigned int count(char* line){
   return counter;
 }
 
-
+/*
+*is_colon
+* 1 = colon in line
+* 0 = no colon in line
+*/
 unsigned int is_colon(char* line){
   unsigned int exist_colon = -1; //-1 = false, 0 = true;
   unsigned int exist_other = -1; //-1 = false, 0 = true;
@@ -65,17 +79,17 @@ unsigned int find_colon(char** line){
       break;
     }
     curr++;
-    *line++;
+    //*line++;
   }
 
   return exist_colon;
 }
 
 /*
-*add_rules - appends rules to pre-existing rules
+*target_parse- creates list of rules
 */
 
-char*** target_parse(char* line, int* argcp, int* argtp, int* argdp){
+char*** target_parse(char* line){
   unsigned int num_args = count(line);
 
   char*** all_args = malloc(2*sizeof(char**));
@@ -116,14 +130,34 @@ char*** target_parse(char* line, int* argcp, int* argtp, int* argdp){
   if(num_args - curr - dep_num != 0){
     num_args--;
   }
-  *argcp = num_args;
-  *argtp = dep_num;
-  *argdp = curr;
+
   //printf("%d\n", *argcp);
   return all_args;
 }
 
-
+/*compares strings, returns 0 if true, else returns -1
+*
+*/
+int comparison(char* arg, target* listing){
+  //printf("int comparison\n");
+  int truth_teller = -1;
+  while(listing != NULL){
+    //printf("listing -> next does a thing\n");
+    char** curr_target = listing->one_tgt;
+    if (curr_target != NULL){
+    //  printf("Yeah\n");
+      int check = strcmp(arg, *curr_target);
+      //printf("%d\n", check);
+      if (check == 0){
+        truth_teller = 0;
+        break;
+      }
+      curr_target++;
+    }
+    listing = listing->next;
+  }
+  return truth_teller;
+}
 /*
 *add_rules - appends rules to pre-existing rules
 */
