@@ -141,24 +141,39 @@ int main(int argc, const char* argv[]) {
   }
   working_tgt->next = NULL;
   if(argc > 1){
+    target* head_place = head;
     for (int i = 1; i < argc; i++){
-        if(comparison(argv[i], working_tgt)){
+      while(head_place->next != NULL){
+        if (comparison(argv[i], head_place)){
+          hlp_process(head_place->three_rule)
+        }else{
+          head_place = head_place->next;
+        }
+      }
+    }
+    /*for (int i = 1; i < argc; i++){
+        if(comparison(argv[i], head)){
           processline();
         }
-    }
+    }*/
   }
 
   free(line);
   return EXIT_SUCCESS;
 }
 
+void hlp_process(char*** rule_set){
+
+
+}
+
 
 /* Process Line
  *
  */
-void processline (char* line) {
+void processline (char** line) {
   int num_arg;
-  char** lne = arg_parse(line, &num_arg);
+  //char** lne = arg_parse(line, &num_arg);
   //printf("num_args: %d\n", num_arg);
 
   const pid_t cpid = fork();
@@ -170,12 +185,12 @@ void processline (char* line) {
   }
 
   case 0: {
-    if (num_arg > 0){
+    //if (num_arg > 0){
     execvp(lne[0], lne);
 
     perror("execvp");
     exit(EXIT_FAILURE);
-    }
+    //}
     break;
   }
 
