@@ -11,15 +11,18 @@
 
 static unsigned int argCount(char* line){
   unsigned int counter = 0;
+  int seen_char = 0;
   while (*line != '\0'){
-    if(*line == ' ' || *line == '\t'){
-      line++;
+    if(isspace((int)*line)){
+        if(seen_char == 1)
+          seen_char = 0;
     }else{
-      counter++;
-      while(*line != ' ' &&  *line != '\0' && *line != '\t'){
-        line++;
+      if (seen_char == 0){
+        counter++;
+        seen_char = 1;
       }
     }
+    line++;
   }
   return counter;
 }
@@ -36,6 +39,7 @@ char** arg_parse(char* line, int* argcp){
   int begin_arg = 1;//1 = false, 0 = true
 
   while(*line != '\0' && num_args > 0){
+    //printf("adding targets...\n");
     if (isspace((int)(*line))){
       if (begin_arg == 0){
         begin_arg = 1;

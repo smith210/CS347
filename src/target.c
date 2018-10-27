@@ -2,73 +2,187 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "target.h"
-#include "arg_parse.h"
 #include <ctype.h>
 #include <string.h>
+#include "arg_parse.h"
+#include "target.h"
 
-target collect_tgts(){
-  FILE* makefile = fopen("./uMakefile", "r");
-  size_t  bufsize = 0;
-  char*   line    = NULL;
-  ssize_t linelen = getline(&line, &bufsize, makefile);
-  target curr;
-  int curr_arg;
-
-  while(-1 != linelen) {
-
-    if(line[linelen-1]=='\n') {
-      linelen -= 1;
-      line[linelen] = '\0';
-    }
-
-    if(is_colon(&line) == 0){
-      curr->one_target = line;
-      int col_place = find_colon(line);
-      curr->two_dependent = arg_parse(line[col_place], &curr_arg);
-    }else{
-//      curr->three_rule = ;
-printf("DERP");
-    }
-
-
-    linelen = getline(&line, &bufsize, makefile);
-  }
-
-  free(line);
-  return curr;
-}
-
-
-
-int target_search(target* t, char* name){
-  return strcmp(t->one_target, name);
-}
-
-static unsigned int find_colon(char* line){
-  unsigned int exist_colon = 0;
+/*
+*is_colon
+* 1 = colon in line
+* 0 = no colon in line
+*/
+static unsigned int count(char* line){
+  unsigned int counter = 0;
+  int seen_char = 0;
   while (*line != '\0'){
+    if(isspace((int)*line)){
+        if(seen_char == 1)
+          seen_char = 0;
+    }else{
+      if (seen_char == 0){
+        counter++;
+        seen_char = 1;
+      }
+    }
+    line++;
+  }
+  return counter;
+}
+
+
+unsigned int is_colon(char* line){
+  unsigned int exist_colon = -1; //-1 = false, 0 = true;
+  unsigned int exist_other = -1; //-1 = false, 0 = true;
+
+  while (*line != '\0'){
+    if(!(isspace((int)*line))){
+      exist_other = 0;
+    }
     if(*line == ':'){
+      if(exist_other != -1){
+        exist_colon = 0;
+        break;
+      }
+    }
+    line++;
+  }
+  return exist_colon;
+}
+
+/*
+*find_colon
+* 1 = no colon exists as arguement
+* 0 = colon exists as arguement
+*/
+unsigned int find_colon(char** line){
+  unsigned int exist_colon = 1;
+  unsigned int curr = 0;
+  while (line[curr] != '\0'){
+    if(is_colon(&*line[curr]) == 0){
+
+      exist_colon = 0;
       break;
     }
-    exist_colon++;
-    line++;
+    curr++;
+    *line++;
   }
+
   return exist_colon;
 }
 
-static unsigned int is_colon(char* line){
-  unsigned int exist_colon = 1; //1 = false, 0 = true;
-  while (*line != '\0'){
-    if(*line == ':'){
-      exist_colon = 0;
+/*
+*add_rules - appends rules to pre-existing rules
+*/
+
+char** target_parse(char* line){
+  unsigned int num_args = count(line);
+
+
+  char** args = malloc ((num_args + 1) * sizeof(char*));
+  unsigned int curr = 0;
+  int begin_arg = 1;//1 = false, 0 = true
+
+  while(*line != ':'){
+    //printf("adding targets...\n");
+    if (isspace((int)(*line))){
+      if (begin_arg == 0){
+        begin_arg = 1;
+        *line = '\0';
+      }
+    }else{
+      printf("%c\n", *line);
+      if (begin_arg == 1){
+        begin_arg = 0;
+        args[curr] = line;
+        curr++;
+      }
     }
-    line++;
+      line++;
   }
-  return exist_colon;
+  *line = '\0';
+
+  return args;
 }
 
+
+/*
+*add_rules - appends rules to pre-existing rules
+*/
 char*** add_rules(char** new_rule, char*** guideline, int num_arg){
   guideline[num_arg] = new_rule;
+  num_arg++;
   return guideline;
 }
+/*
+
+int is_tgt_alphabet(char* line){
+  if (*line == '\0'){
+    return -1;
+  }
+  if (*line == '\t'){
+    return -1;
+  }
+  if (isspace((int)*line)){
+    return 0;
+  }
+  if (*line == ':'){
+    return 1;
+  }else{
+    return 2;
+  }
+}
+
+*state cases
+
+int is_tgt_q0(char* line){
+  switch(is_tgt_alphabet(line)) {
+    case -1: {
+      return 0;
+    }
+    case 0: {
+      return is_tgt_q0(line++);
+    }
+    case 1: {
+      return is_tgt_q1(line);
+    }
+    case 2: {
+      return is_tgt_q1(line);
+    }
+  }
+}
+
+int is_tgt_q1(char* line){
+  switch(is_tgt_alphabet(line)) {
+    case -1: {
+      return 0;
+    }
+    case 0: {
+      return is_tgt_q0(line++);
+    }
+    case 1: {
+      return 1;
+    }
+    case 2: {
+      return is_tgt_q2(line);
+    }
+  }
+}
+
+int is_tgt_q2(char* line){
+  switch(is_tgt_alphabet(line)) {
+    case -1: {
+      return 0;
+    }
+    case 0: {
+      return is_tgt_q2(line++);
+    }
+    case 1: {
+      return 1;
+    }
+    case 2: {
+      return is_tgt_q2(line);
+    }
+  }
+}
+*/
