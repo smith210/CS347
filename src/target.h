@@ -1,28 +1,26 @@
 #ifndef HEADER_TARGET
 #define HEADER_TARGET
 
-unsigned int is_colon(char* line);
-unsigned int find_colon(char** line);
-int state_one(char* line);
-char** add_tgt(char* new_rule, char** guideline, int num_arg);
-char*** add_rules(char** new_rule, char*** guideline, int num_arg);
-int is_tgt_alphabet(char* line);
-char*** target_parse(char* line);
-int is_tgt_q0(char* line);
-int is_tgt_q1(char* line);
-int is_tgt_q2(char* line);
+typedef struct rule_st{
+  char* rule_detail;
+  struct rule_st* rule_next;
+}rules;
 
 typedef struct target_st{
-    char** one_tgt;
-    //char** multi_tgt;
+    char* one_tgt;
     char** two_dpndt;
-    char*** three_rule;
+    rules* rules;
     struct target_st* next;
-}target;
+}targets;
 
-int comparison(char* arg, target* listing);
-target collect_tgts(char* line);
-target assign_tgts(char* line, target collector, int* curr_arg, int* rule_tracker);
-int target_search(target* t, char* name);
+void add_target_dsc(char* line, targets** list_rule);
+void add_tgt_dpt0(char* line, targets** list_tgt);
+void add_tgt_dpt1(char* line, targets** list_tgt);
+void add_tgt_dpt2(char* line, targets** list_tgt);
+void add_rules(char* line, int type_target, targets** holder);
+int is_alphabet(char* line);
+int is_tgt_alphabet(char* line);
+int check_arg_0(char* line);
+unsigned int is_colon(char* line);
 
 #endif
