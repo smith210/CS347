@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
 #include "arg_parse.h"
 #include <ctype.h>
 /*  argCount
@@ -43,9 +44,12 @@ char** arg_parse(char* line, int* argcp){
     if (isspace((int)(*line))){
       if (begin_arg == 0){
         begin_arg = 1;
+      }
+      *line = '\0';
+    }else{
+      if(*line == '='){
         *line = '\0';
       }
-    }else{
       if (begin_arg == 1){
         begin_arg = 0;
         args[curr] = line;

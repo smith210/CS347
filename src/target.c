@@ -7,6 +7,37 @@
 #include "arg_parse.h"
 #include "target.h"
 
+char** retrieve_dpt(char* line, int* sz){
+    while(*line != ':'){
+      line++;
+    }
+
+    *line = '\0';
+    line++;
+
+    char** faux_dependents = arg_parse(line, sz);
+    int sz_a =*sz;
+    if(sz_a == 0){
+      return NULL;
+    }
+    char** dependents = malloc(sz_a * sizeof(char*));
+    int curr = 0;
+    //char** act_dpt = malloc ((sz) * sizeof(char*));
+    while(curr != sz_a){
+      dependents[curr] = strdup(*faux_dependents);
+      //printf("string: %s\n", dependents[curr]);
+      curr++;
+      faux_dependents++;
+
+    }
+    dependents[curr] = NULL;
+    faux_dependents = dependents;
+    //printf("%s is my first dependent\n", *faux_dependents);
+    //printf("did escape?\n");
+    return faux_dependents;
+
+}
+
 unsigned int is_colon(char* line){
   unsigned int exist_colon = -1; //-1 = false, 0 = true;
   unsigned int exist_other = -1; //-1 = false, 0 = true;
@@ -17,7 +48,7 @@ unsigned int is_colon(char* line){
     }
     if(*line == ':'){
       if(exist_other != -1){
-        *line = '\0';
+        //*line = '\0';
         exist_colon = 0;
         break;
       }
@@ -28,13 +59,25 @@ unsigned int is_colon(char* line){
   return exist_colon;
 }
 
+void printdpt(char** lines, int sz){
+  int curr = 0;
+  while (curr != sz){
+    printf("curr->%d\n", curr);
+    printf("dpt: %s\n", *lines);
+    lines++;
+    curr++;
+  }
+}
 
-void add_target_dsc(char* line, targets** target_rule){
-
+void add_target_dsc(char* line, targets** target_rule, char*** dpts, int dpt_sz){
+  //printf("target -> %s\n", line);
+  //printf("num dependent -> %d\n", dpt_sz);
+//printdpt(*dpts, dpt_sz);
   targets* new_target = (targets*) malloc(sizeof(targets));
   targets* end_target_list = *target_rule;
 
   new_target->one_tgt = strdup(line);
+  new_target->two_dpndt = *dpts;
   new_target->next = NULL;
 
 
@@ -71,7 +114,8 @@ void add_rules(char* line,  int type_target, targets** holder){
       //printf("next\n");
       i++;
   }
-
+  //printf("target: %s\n", end_target_list->one_tgt);
+  //printf("rule being added: %s\n", line);
   new_rule->rule_detail = strdup(line);
   new_rule->rule_next = NULL;
 
@@ -93,12 +137,27 @@ void add_rules(char* line,  int type_target, targets** holder){
 
 int is_alphabet(char* line){
   if (is_colon(line) == -1 && *line != '\t'){
+    if(has_equal(line) == 0){
+      return 2;
+    }else{
     return -1;
+    }
   }
   if (*line == '\t'){
     return 0;
   }
   return 1;
+}
+
+int has_equal(char* line){
+  int is_equal = 1;
+  while(*line != '\0'){
+    if(*line == '='){
+      is_equal = 0;
+    }
+    line++;
+  }
+  return is_equal;
 }
 
 int is_tgt_alphabet(char* line){
@@ -113,12 +172,13 @@ int is_tgt_alphabet(char* line){
 
 }
 
-void add_tgt_dpt0(char* line, targets** tracker){
+void add_tgt_dpt0(char* line, targets** tracker, char*** dpts, int dpt_sz){
   while(isspace((int) *line)){
 
     line++;
   }
-  add_target_dsc(line, tracker);
+  //printdpt(*dpts, dpt_sz);
+  add_target_dsc(line, tracker, dpts, dpt_sz);
   return;
 
 }
