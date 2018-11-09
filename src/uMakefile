@@ -16,6 +16,8 @@ Fruits: salad
 	echo watermelon
 	echo mangoes
 
+
+
 salad: 
 	echo is this really a salad?
 	echo I live in a ${house} so its warm.
@@ -40,6 +42,7 @@ MartWS :     F
 umake: umake.o arg_parse.o target.o
 	gcc -o umake umake.o arg_parse.o target.o
 	cp -p umake bin
+	echo print statement
 	export PATH=bin:${PATH}
 
 umake.o: umake.c arg_parse.h target.h
@@ -79,7 +82,7 @@ foxtrot: juliet golf
 golf: kilo papa
 	echo golden
 	echo kiss
-	echo portion
+	echo potion
 hotel: india
 	echo honduras
 	echo introverted
@@ -139,7 +142,11 @@ yankee:
 zulu:
 	echo zoom
 
+recurse: precurse
+	echo mwh
 
+precurse: recurse
+	echo hahaha
 
 install: umake
 	cp -p umake ${HOME}/bin/umake
@@ -160,4 +167,4 @@ carrot = durian
 eggplant = ${fiji_apple}
 fiji_apple = grapefruit
 house = igloo
-data = atad
+tractor = car

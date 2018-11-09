@@ -35,7 +35,7 @@ char** arg_parse(char* line, int* argcp){
   unsigned int num_args = argCount(line);
   *argcp = num_args;
   char* new_line = strdup(line);
-  char** args = malloc ((num_args + 1) * sizeof(char*));
+  char** args = malloc ((num_args+1) * sizeof(char*));
   unsigned int curr = 0;
   int begin_arg = 1;//1 = false, 0 = true
 

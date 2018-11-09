@@ -24,7 +24,7 @@ char** retrieve_dpt(char* line, int* sz){
     if(sz_a == 0){
       return NULL;
     }
-    char** dependents = malloc(sz_a * sizeof(char*));
+    char** dependents = malloc((sz_a+1) * sizeof(char*));
     int curr = 0;
     //char** act_dpt = malloc ((sz) * sizeof(char*));
     while(curr != sz_a){
@@ -83,7 +83,7 @@ void add_target_dsc(char* line, targets** target_rule, char*** dpts, int dpt_sz)
   new_target->one_tgt = strdup(line);
   new_target->two_dpndt = *dpts;
   new_target->next = NULL;
-
+  new_target->rules = NULL;
 
 
   if((*target_rule)->one_tgt == NULL){
