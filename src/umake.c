@@ -26,13 +26,9 @@
  */
  void processline(char* line);
  void hlp_process(rules** instructions);
- int expand(char* orig, char* new, int newsize);
- char* dup_env(char* line);
- int expand_0(char* line);
- int expand_alphabet(char* line);
- int bracket_check(char* line);
   void execute_dpt(char** dpt, targets** roster);
    void execute_dpt_hlp(char* dpt, targets** roster);
+
 
 
  /* Arg Parse
@@ -44,14 +40,14 @@
 
  /* Main entry point.
   * argc    A count of command-line arguments
-  * argv    The command-line argument valus
+  * argv    The command-line argument values
   *
   * Micro-make (umake) reads from the uMakefile in the current working
   * directory.  The file is read one line at a time.  Lines with a leading tab
   * character ('\t') are interpreted as a command and passed to processline minus
   * the leading tab.
   */
- int main(int argc, const char* argv[]) {
+ int main(int argc, char* argv[]) {
 
    FILE* makefile = fopen("./uMakefile", "r");
 
@@ -71,14 +67,6 @@
        linelen -= 1;
        line[linelen] = '\0';
      }
- /*
-     if(line[0] == '\t')
-       processline(&line[1]);
- */
-
-     //if(historian->rules != NULL){
-     //  printf("%s\n", historian->rules->rule_detail);
-     //}
 
 
      switch(is_alphabet(&line[0])){
@@ -129,31 +117,19 @@
        //printf("WHATS FOR LOOPING in %d?\n", i);
 
        targets* end_target_list = *(&historian);
-       while(end_target_list != NULL){
+       char* goal = argv[i];
+       execute_dpt_hlp(goal, &end_target_list);
 
-         if (strcmp(end_target_list->one_tgt, argv[i]) == 0){
-           //check for dependencies
-           char** dependents = end_target_list->two_dpndt;
-
-           if (dependents != NULL){
-             targets* dictionary = *(&historian);
-             execute_dpt(end_target_list->two_dpndt, &dictionary);
-             //printf("YEAH THERE's dependents whoo\n");
-           }
-             hlp_process(&(end_target_list->rules));
-
-         }
-
-           end_target_list = end_target_list->next;
-
-       }
      }
  }
 
    free(line);
    return EXIT_SUCCESS;
  }
-
+ /*execute_dpt
+  *recursive calling dependencies for a target.
+  *
+ */
  void execute_dpt(char** dpt, targets** roster){
 
      while(*dpt != NULL){
@@ -161,8 +137,12 @@
        dpt++;
      }
 
-
  }
+
+ /*execute_dpt_hlp
+  *recursive calling dependencies for a target.
+  *
+ */
 
  void execute_dpt_hlp(char* dpt, targets** roster){
    targets* end_target_list = *roster;
@@ -187,6 +167,10 @@
 
  }
 
+
+ /*hlp_process
+  *passes all rules for a target into processline
+ */
  void hlp_process(rules** instructions){
 
    rules *end_rule_list = *instructions;
@@ -201,144 +185,6 @@
 
  }
 
- /* enviornment expansions
- *
- */
-
- /*expand - expands enviornmental variables.
-  *env_holder - buffer that can contain the enviornment desired
-  *
-  *validity - flag, marks when the char is '$'
-  *is_valid - flag, determines whether the line has valid syntax (no missing {})
-  *is_cbrace - flag, checks if '{' appears after '$'
-  *bracket_valid - flag, checks for matching/mismatching brackets
-  *
-  *val - value of where to place values in temporary buffer env_holder
-  *buff_val - value of where to place values in buffer new
-  *
-  *if flags = 1, then false
-  *if flags = 0, then true
- */
-
- int expand(char* orig, char* new, int newsize){
-      //printf("expand\n");
-       char env_holder[newsize];
-       int validity = 1;
-       int is_cbrace = 1;
-       int bracket_valid = bracket_check(orig);
-       //int is_valid = expand_0(orig);
-       int val = 0;
-       int buff_val = 0;
-       //int nxt_rc = 1;
-       //printf("is_valid: %d\n", is_valid);
-       //if(bracket_valid == 1){
-         //return 0;
-       //}
-
-       if(bracket_valid == 0){
-         while (*orig != '\0'){
-
-           if (validity == 0){
-             //printf("validity true\n");
-             if(*orig == '{'){
-               //printf("is_cbrace\n");
-               is_cbrace = 0;
-             }
-
-             if(is_cbrace == 0 && *orig != '{' && *orig != '}'){
-             env_holder[val] = *orig;
-             val++;
-             //printf("curr: %s\n", env_holder);
-             }
-             if(is_cbrace == 1){
-               new[buff_val] = '$';
-               buff_val++;
-               new[buff_val] = *orig;
-               buff_val++;
-               //printf("not is_cbrace\n");
-               validity = 1;
-             }
-           }
-
-           if(*orig == '$'){
-             validity = 0;
-             val = 0;
-             is_cbrace = 1;
-             //nxt_rc = 0;
-             memset(env_holder, 0, newsize);
-           }
-
-           if(*orig == '}'){
-             validity = 1;
-             char* b = getenv(env_holder);
-             //printf("%s is the enviornment...\n", b);
-             if (b != NULL){
-               while(*b != '\0'){
-                 new[buff_val] = *b;
-                 buff_val++;
-                 b++;
-               }
-               //printf("What to return: %s\n", new);
-             }
-             //puts(getenv("USER"));
-           }
-           if(validity == 1 && *orig != '}' && *orig != '\\'){
-             new[buff_val] = *orig;
-             buff_val++;
-             //printf("What to return: %s\n", new);
-           }
-           //printf("Moving to next value...\n\n");
-           orig++;
-       }
-       }else{
-         //printf("Yeah can't do that lol\n");
-         return 0;
-       }
-       //buff_val++;
-       new[buff_val] = '\0';
-       //printf("What to return: %s\n", new);
-       //memset(new, buff_val, newsize);
-       return 1;
-   }
-
-/*bracket_check - helper flag function for expand
-*returns 1 if valid
-*returns 0 if invalid
-*note - this only checks for same number of brackets,
-*       the expand function will do syntax checks.
-*/
-int bracket_check(char* line){
-  int right_brace = 0;
-  int left_brace = 0;
-
-  while(*line != '\0'){
-    if(*line == '}'){
-      right_brace++;
-    }
-    if(*line == '{'){
-      left_brace++;
-    }
-    line++;
-  }
-
-  if (left_brace == right_brace){
-    return 0;
-  }else{
-    return 1;
-  }
-}
-
-   /* size_line
-    * returns total number of chars in line.
-    */
-   int size_line (char* line){
-     int sz = 0;
-     while(*line != '\0'){
-       line++;
-       sz++;
-     }
-     return sz;
-   }
 
 
  /* Process Line
@@ -358,8 +204,8 @@ int bracket_check(char* line){
   //printf("is_expand: %d\n", is_expand);
   if(is_expand == 0){
     //line = new_rule;
-    printf("ERROR: expand\n");
-    exit(1);
+    fprintf(stderr, "expand: invalid rule\n");
+    exit(-1);
   }
     line = new_rule;
    char** lne = arg_parse(line, &is_arg);

@@ -34,29 +34,29 @@ static unsigned int argCount(char* line){
 char** arg_parse(char* line, int* argcp){
   unsigned int num_args = argCount(line);
   *argcp = num_args;
-
+  char* new_line = strdup(line);
   char** args = malloc ((num_args + 1) * sizeof(char*));
   unsigned int curr = 0;
   int begin_arg = 1;//1 = false, 0 = true
 
-  while(*line != '\0' && num_args > 0){
+  while(*new_line != '\0' && num_args > 0){
     //printf("adding targets...\n");
-    if (isspace((int)(*line))){
+    if (isspace((int)(*new_line))){
       if (begin_arg == 0){
         begin_arg = 1;
       }
-      *line = '\0';
+      *new_line = '\0';
     }else{
-      if(*line == '='){
-        *line = '\0';
+      if(*new_line == '='){
+        *new_line = '\0';
       }
       if (begin_arg == 1){
         begin_arg = 0;
-        args[curr] = line;
+        args[curr] = new_line;
         curr++;
       }
     }
-      line++;
+      new_line++;
   }
 
   return args;
