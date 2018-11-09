@@ -204,6 +204,10 @@ int has_equal(char* line){
  *
  *if flags = 1, then false
  *if flags = 0, then true
+ *
+ *return values for expand:
+ *      1 -> true
+ *      0 -> false, should return error
 */
 
 int expand(char* orig, char* new, int newsize){
@@ -217,7 +221,7 @@ int expand(char* orig, char* new, int newsize){
       int buff_val = 0;
 
       if(bracket_valid == 0){
-        if(env_valid == 0){
+        if(env_valid == 1){
           return 0;
         }
         while (*orig != '\0'){
@@ -309,8 +313,8 @@ int bracket_check(char* line){
 }
 
 /*valid_env - helper flag function for expand
-*returns 1 if valid
-*returns 0 if invalid
+*returns 0 if valid
+*returns 1 if invalid
 * checks if the eniovnment is empty
 */
 int valid_env(char* line){
@@ -318,7 +322,7 @@ int valid_env(char* line){
 
  while(*line != '\0'){
    if(in_env == 0 && (isspace((int)(*line)))){
-     return 0;
+     return 1;
      break;
    }
    if(*line == '}'){
@@ -330,7 +334,7 @@ int valid_env(char* line){
    line++;
  }
 
-   return 1;
+   return 0;
 }
   /* size_line
    * returns total number of chars in line.
