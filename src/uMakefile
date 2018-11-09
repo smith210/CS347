@@ -1,5 +1,163 @@
-	pwd
-	ls
-	pwd
-	who
+umake_pract : umake.o arg_parse.o
+	echo ${One} -o umake umake.o arg_parse.o                         
+	echo Done
 
+Aa dD : F G H
+	echo A is for alpha
+	echo brava
+   Beeaaach:
+	echo Saaaaaaand?
+	echo Where's the ocean
+	echo there a shark!! Lifeguard!!!
+Fruits: salad
+	echo pineapple
+	echo grapes
+	echo ${apple}, ${eggplant}, and ${carrot} oh my!!
+	echo watermelon
+	echo mangoes
+
+salad: 
+	echo is this really a salad?
+	echo I live in a ${house} so its warm.
+F:
+	echo we did F 
+	echo one down
+
+G:
+	echo we did G 
+	echo two down, one to go
+
+H: Beeaaach
+	echo we did H 
+	echo yaaay
+
+Aran Nosualc:
+	echo Nara Clauson
+
+MartWS :     F
+	echo WJS
+
+umake: umake.o arg_parse.o target.o
+	gcc -o umake umake.o arg_parse.o target.o
+	cp -p umake bin
+	export PATH=bin:${PATH}
+
+umake.o: umake.c arg_parse.h target.h
+	gcc -c umake.c 
+	echo umake.o
+
+arg_parse.o: arg_parse.c arg_parse.h
+	gcc -c arg_parse.c
+	echo arg_parse.o
+
+target.o: target.c target.h
+	gcc -c target.c
+	echo target.o
+
+collector: aran
+	echo This is my collection :)
+
+aran: bravo charlie
+	echo apple
+	echo bravo
+	echo clauson
+bravo: delta epsilon
+	echo daisy
+	echo ellis
+charlie: zulu yankee
+	echo canada
+	echo zebra
+	echo ${USER}${USER} P${USER}
+	echo yesterday
+delta: foxtrot
+	echo doorbell
+	echo france
+echo: papa mike
+	echo edison
+foxtrot: juliet golf
+	echo flips
+golf: kilo papa
+	echo golden
+	echo kiss
+	echo portion
+hotel: india
+	echo honduras
+	echo introverted
+india: lima mike
+	echo industry
+	echo liberty
+	echo monster
+juliet: sierra tango
+	echo jalepeno
+	echo seattle
+	echo tacoma
+kilo: echo
+	echo kingdom
+	echo elephant
+lima: foxtrot echo
+	echo lopsided
+	echo ferries
+	echo electricity
+mike: quebec romeo
+	echo miller
+	echo queasy
+	echo robust
+november: delta charlie
+	echo naughty
+	echo december
+	echo california
+oscar: echo victor whiskey
+	echo orange
+	echo valevictorian
+	echo washington
+papa: tango charlie
+	echo pina
+	echo tasty
+	echo colada
+quebec:
+	echo queen
+romeo:
+	echo random
+sierra: tango uniform whiskey
+	echo soiree
+	echo tangible
+	echo uzbeckistan
+	echo wistful
+tango:
+	echo tocatta
+uniform:
+	echo umbrellla
+victor: tango
+	echo volleyball
+	echo topple
+whiskey:
+	echo wallingford
+x-ray:
+	echo x-ing
+yankee:
+	echo yodel
+zulu:
+	echo zoom
+
+
+
+install: umake
+	cp -p umake ${HOME}/bin/umake
+
+who:
+	echo The user is ${USER}asdf  ${USER. ${USER} . ${USER}. 
+
+who_fail:
+	echo ${USER   }
+
+who1:
+	echo The user is going to print 5 $\5 we printed 5 ${USER}. 
+
+One = ${two}
+two = three
+apple = banana
+carrot = durian
+eggplant = ${fiji_apple}
+fiji_apple = grapefruit
+house = igloo
+data = atad
