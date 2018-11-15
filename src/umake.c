@@ -51,13 +51,20 @@
 
    FILE* makefile = fopen("./uMakefile", "r");
 
+   if (makefile == NULL){
+     perror("fopen");
+     exit(EXIT_FAILURE);
+   }else{
+
    size_t  bufsize = 0;
    char*   line    = NULL;
    ssize_t linelen = getline(&line, &bufsize, makefile);
 
    targets* historian = (targets*) malloc(sizeof(targets));
    historian->one_tgt = NULL;
+   historian->two_dpndt = NULL;
    historian->rules = NULL;
+   historian->next = NULL;
 
    int target_acc = 0;
 
@@ -72,15 +79,18 @@
      switch(is_alphabet(&line[0])){
  //not a target/dependent or rule
      case -1: {
+
        break;
      }
 
      case 0: {
+
        add_rules(&line[1], target_acc, &historian);
        break;
      }
 
      case 1: {
+
        //printf("No?\n");
        int dpt_sz;
 
@@ -93,19 +103,22 @@
      }
 
     case 2:{
+
       int garbage;
       char** env_contain = arg_parse(&line[0], &garbage);
       char* name = strdup(env_contain[0]);
       //printf("%s\n", name);
       char* value = strdup(env_contain[2]);
       int did_setenv = setenv(name, value, 1);
-
       if(did_setenv != 0){
         perror("setenv");
         exit(EXIT_FAILURE);
         break;
       }
+      line = NULL;
+
      }
+
      }
 
      linelen = getline(&line, &bufsize, makefile);
@@ -122,9 +135,9 @@
 
      }
  }
-
    free(line);
    return EXIT_SUCCESS;
+ }
  }
  /*execute_dpt
   *recursive calling dependencies for a target.
@@ -207,8 +220,7 @@
     fprintf(stderr, "expand: invalid rule\n");
     exit(-1);
   }
-    line = new_rule;
-   char** lne = arg_parse(line, &is_arg);
+   char** lne = arg_parse(new_rule, &is_arg);
 
 
    const pid_t cpid = fork();

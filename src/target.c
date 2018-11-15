@@ -35,10 +35,10 @@ char** retrieve_dpt(char* line, int* sz){
 
     }
     dependents[curr] = NULL;
-    faux_dependents = dependents;
+    free(*faux_dependents);
     //printf("%s is my first dependent\n", *faux_dependents);
     //printf("did escape?\n");
-    return faux_dependents;
+    return dependents;
 
 }
 /* is_colon
@@ -97,7 +97,6 @@ void add_target_dsc(char* line, targets** target_rule, char*** dpts, int dpt_sz)
 
   end_target_list->next = new_target;
 
-
   return;
 
 }
@@ -149,10 +148,11 @@ void add_rules(char* line,  int type_target, targets** holder){
 * function used for alphabet to determine how the line from the file
 * is read and parsed in the umake files accordingly.
 *
-* -1 : Empty line
+* -1 : Empty line, invalid lines, or commented lines
 * 1  : Everything Else
 * 0  : Rule
 * 2  : Enviornment - needs to be set
+* 3  : commments
 */
 int is_alphabet(char* line){
   if (is_colon(line) == -1 && *line != '\t'){
@@ -183,7 +183,6 @@ int has_equal(char* line){
   }
   return is_equal;
 }
-   int valid_env(char* line);
 
 
 /* enviornment expansions
@@ -222,8 +221,9 @@ int expand(char* orig, char* new, int newsize){
 
       if(bracket_valid == 0){
         if(env_valid == 1){
+          //free(env_holder);
           return 0;
-        }
+        }else{
         while (*orig != '\0'){
 
           if (validity == 0){
@@ -274,10 +274,10 @@ int expand(char* orig, char* new, int newsize){
           }
           orig++;
       }
+      }
       }else{
         return 0;
       }
-
       new[buff_val] = '\0';
       return 1;
   }

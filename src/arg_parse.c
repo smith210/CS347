@@ -34,13 +34,15 @@ static unsigned int argCount(char* line){
 char** arg_parse(char* line, int* argcp){
   unsigned int num_args = argCount(line);
   *argcp = num_args;
+  char** args = (char**)malloc(num_args * sizeof(char*)+1);
   char* new_line = strdup(line);
-  char** args = malloc ((num_args+1) * sizeof(char*));
   unsigned int curr = 0;
   int begin_arg = 1;//1 = false, 0 = true
+  if(num_args <= 0){
+	   return NULL;
+  }else{
+   while(*new_line != '\0'){
 
-  while(*new_line != '\0' && num_args > 0){
-    //printf("adding targets...\n");
     if (isspace((int)(*new_line))){
       if (begin_arg == 0){
         begin_arg = 1;
@@ -52,12 +54,13 @@ char** arg_parse(char* line, int* argcp){
       }
       if (begin_arg == 1){
         begin_arg = 0;
-        args[curr] = new_line;
+        args[curr]=new_line;
         curr++;
       }
     }
       new_line++;
   }
-
+  }
+  //free(new_line);
   return args;
 }
