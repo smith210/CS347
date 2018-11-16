@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include <string.h>
+#include <time.h>
 #include "target.h"
 #include "arg_parse.h"
 
@@ -28,6 +30,7 @@
  void hlp_process(rules** instructions);
   void execute_dpt(char** dpt, targets** roster);
    void execute_dpt_hlp(char* dpt, targets** roster);
+   void is_new(char** dpt, struct stat *buf, int b);
 
 
 
@@ -48,14 +51,12 @@
   * the leading tab.
   */
  int main(int argc, char* argv[]) {
-
    FILE* makefile = fopen("./uMakefile", "r");
 
    if (makefile == NULL){
      perror("fopen");
      exit(EXIT_FAILURE);
    }else{
-
    size_t  bufsize = 0;
    char*   line    = NULL;
    ssize_t linelen = getline(&line, &bufsize, makefile);
@@ -151,6 +152,29 @@
      }
 
  }
+/*is_new
+*checks if dependencies exist and if dependencies are newer than target
+*
+*/
+void is_new(char** dpt, struct stat *buf, int b){
+  struct stat *dpt_buf = (struct stat*) malloc(sizeof(struct stat));
+  while(*dpt != NULL){
+    int dpt_b = stat(*dpt, dpt_buf);
+    if(dpt_b == -1){
+      perror("is_new->stat");
+      exit(EXIT_FAILURE);
+    }else{
+      if(b != -1 && difftime(dpt_buf->st_mtime, buf->st_mtime) < 0){
+        exit(EXIT_FAILURE);
+      }
+    }
+    dpt++;
+  }
+  return;
+}
+
+
+
 
  /*execute_dpt_hlp
   *recursive calling dependencies for a target.
@@ -162,22 +186,26 @@
    while(end_target_list != NULL){
 
      if (strcmp(end_target_list->one_tgt, dpt) == 0){
-       //check for dependencies
+       struct stat *buf = (struct stat*) malloc(sizeof(struct stat));
+       int b = stat(end_target_list->one_tgt, buf);
        char** dependents = end_target_list->two_dpndt;
-
-       if (dependents != NULL){
+       if(b != -1 && dependents == NULL){
+         printf("no dependents, already exist\n");
+         exit(EXIT_FAILURE);
+       }else{
+         if(dependents != NULL){
+         is_new(dependents, buf, b);
          targets* dictionary = *roster;
          execute_dpt(end_target_list->two_dpndt, &dictionary);
-         //printf("YEAH THERE's dependents whoo\n");
        }
+      }
          hlp_process(&(end_target_list->rules));
 
      }
+
        end_target_list = end_target_list->next;
 
    }
-
-
  }
 
 
@@ -187,14 +215,11 @@
  void hlp_process(rules** instructions){
 
    rules *end_rule_list = *instructions;
-   //printf("In hlp_process\n");
-   //printf("hlp_process: %s\n", end_rule_list->rule_detail);
+
    while (end_rule_list != NULL){
-     //printf("I'm not null YEEEEEEET\n");
      processline(end_rule_list->rule_detail);
      end_rule_list = end_rule_list->rule_next;
    }
-   //printf("Guess we're out of rules\n\n");
 
  }
 

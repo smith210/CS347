@@ -152,7 +152,6 @@ void add_rules(char* line,  int type_target, targets** holder){
 * 1  : Everything Else
 * 0  : Rule
 * 2  : Enviornment - needs to be set
-* 3  : commments
 */
 int is_alphabet(char* line){
   if (is_colon(line) == -1 && *line != '\t'){
