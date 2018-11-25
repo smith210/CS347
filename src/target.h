@@ -32,6 +32,7 @@ int bracket_check(char* line);
  void execute_dpt(char** dpt, targets** roster);
   int valid_env(char* line);
 int size_line (char* line);
-
+int has_redirect(char* lne);
+int redirect_alphabet(char** lne, int place);
 
 #endif

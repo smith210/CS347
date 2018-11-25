@@ -167,6 +167,41 @@ int is_alphabet(char* line){
   return 1;
 }
 
+/*has_direct
+*
+* 0 : has a IO Redirect
+* 1 : doesn't have IO redirect
+*/
+int has_redirect(char* lne){
+	if(*lne == '>' || *lne == '<'){
+		return 1;
+	}
+	return 0;
+}
+
+/*redirect_alphabet
+*
+*
+*/
+int redirect_alphabet(char** lne, int place){
+	printf("%c: lne[place]", *lne[place]);
+	if(*lne[place] == '<'){
+		printf("return 0\n");
+		return 0;
+	}
+	if(*lne[place] == '>'){
+		printf("satisfyied?\n");
+		if(*lne[place]++ == '>'){
+			printf("return 2\n");
+			return 2;
+		}
+		printf("return 1\n");
+		return 1;
+	}
+	printf("umm...\n");
+	return -1;
+
+}
 /* has_equal
 *
 * returns 0 if '=' is in the file line

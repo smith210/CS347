@@ -28,10 +28,9 @@
  */
  void processline(char* line);
  void hlp_process(rules** instructions);
-  void execute_dpt(char** dpt, targets** roster);
-   void execute_dpt_hlp(char* dpt, targets** roster);
-   void is_new(char** dpt, struct stat *buf, int b);
-
+ void execute_dpt(char** dpt, targets** roster);
+ void execute_dpt_hlp(char* dpt, targets** roster);
+ void is_new(char** dpt, struct stat* buf, int b);
 
 
  /* Arg Parse
@@ -99,7 +98,7 @@
        //printdpt(dpts, dpt_sz);
        add_tgt_dpt0(&line[0], &historian, &dpts, dpt_sz);
        target_acc++;
-       //printf("we done?\n");
+       //printf("we done?\n");n
        break;
      }
 
@@ -156,18 +155,20 @@
 *checks if dependencies exist and if dependencies are newer than target
 *
 */
-void is_new(char** dpt, struct stat *buf, int b){
-  struct stat *dpt_buf = (struct stat*) malloc(sizeof(struct stat));
+void is_new(char** dpt, struct stat* buf, int b){
+  struct stat* dpt_buf =(struct stat*) malloc(sizeof(struct stat));
   while(*dpt != NULL){
-    int dpt_b = stat(*dpt, dpt_buf);
-    if(dpt_b == -1){
-      perror("is_new->stat");
-      exit(EXIT_FAILURE);
-    }else{
-      if(b != -1 && difftime(dpt_buf->st_mtime, buf->st_mtime) < 0){
+ 	  stat(*dpt, dpt_buf);
+    //if(dpt_b == -1){
+     // perror("is_new->stat");
+     // exit(EXIT_FAILURE);
+   // }else{
+      time_t dpt_time = dpt_buf->st_mtim.tv_sec;
+      time_t buf_time = buf->st_mtim.tv_sec;
+      if(b != -1 && difftime(dpt_time, buf_time) < 0){
         exit(EXIT_FAILURE);
       }
-    }
+   //}
     dpt++;
   }
   return;
@@ -186,7 +187,7 @@ void is_new(char** dpt, struct stat *buf, int b){
    while(end_target_list != NULL){
 
      if (strcmp(end_target_list->one_tgt, dpt) == 0){
-       struct stat *buf = (struct stat*) malloc(sizeof(struct stat));
+       struct stat* buf = (struct stat*) malloc(sizeof(struct stat));
        int b = stat(end_target_list->one_tgt, buf);
        char** dependents = end_target_list->two_dpndt;
        if(b != -1 && dependents == NULL){
@@ -246,7 +247,42 @@ void is_new(char** dpt, struct stat *buf, int b){
     exit(-1);
   }
    char** lne = arg_parse(new_rule, &is_arg);
-
+	for (int i = 0; i < is_arg; i++){
+		char* fauxline = strdup(lne[i]);
+		if (has_redirect(fauxline)){
+			FILE *fd_1, *fd_2;
+			
+			switch(redirect_alphabet(lne, i)){
+			case 0: {//'<': redirect, read-only mode & execute
+				printf("<");
+				fd_1 = fopen(lne[i-1],"r");			
+				fd_2 = fopen(lne[i+1],"r");
+			}
+			case 1: {//'>':  directs output into file. If file exists, overwrite, else create
+				printf(">");
+				fd_1 = fopen(lne[i-1],"r");
+				fd_2 = fopen(lne[i+1],"w");
+			}	
+			case 2: {//'>>' append: same as '>', except if file exists append.
+				printf(">>");
+				fd_1 = fopen(lne[i-1],"r");
+				fd_2 = fopen(lne[i+1],"a");
+			}
+			}
+			//printf("there\n");
+   			size_t  bufsize = 0;
+   			char*   line_fd    = NULL;
+   			ssize_t linelen = getline(&line_fd, &bufsize, fd_1);
+			//printf("here\n");
+			while(linelen != -1){
+				fputs(line_fd, fd_2);
+				getline(&line_fd, &bufsize, fd_1);
+			}
+			free(line_fd);
+			fclose(fd_1);
+			fclose(fd_2);
+		}
+	}	
 
    const pid_t cpid = fork();
    switch(cpid) {
@@ -258,7 +294,6 @@ void is_new(char** dpt, struct stat *buf, int b){
 
    case 0: {
      if(is_arg > 0){
-    //printf("string: %s\n", lne[0]);
      execvp(lne[0], lne);
 
      perror("execvp");
